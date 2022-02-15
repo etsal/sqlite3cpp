@@ -3,6 +3,7 @@
 
 #include "sqlite3.h"
 
+#include <array>
 #include <exception>
 #include <sstream>
 #include <string>
@@ -28,6 +29,8 @@ private:
 
 class Result {
 public:
+  Result() : code_(SQLITE_OK) {}
+
   explicit Result(int code) : code_(code) {}
 
   operator int() { return code_; } // NOLINT (allow implicit conversion)
@@ -43,6 +46,8 @@ public:
 private:
   int code_;
 };
+
+enum TransactionBehavior { DEFERRED, IMMEDIATE, EXCLUSIVE };
 
 struct Null {};
 
@@ -225,6 +230,12 @@ public:
 
   Result reset() { return Result(sqlite3_reset(p_stmt_.get())); }
 
+  Result execute() {
+    while (step() == SQLITE_DONE)
+      ;
+    return reset();
+  }
+
   template <typename T> Result bind(int i, T v) = delete;
 
 private:
@@ -297,7 +308,12 @@ class Connection {
 public:
   Connection() = default;
 
-  explicit Connection(sqlite3 *p_conn) : p_conn_(p_conn, sqlite3_close) {}
+  explicit Connection(sqlite3 *p_conn) : p_conn_(p_conn, sqlite3_close) {
+    prepare(begin_[0], "BEGIN DEFERRED").expect(SQLITE_OK);
+    prepare(begin_[0], "BEGIN IMMEDIATE").expect(SQLITE_OK);
+    prepare(begin_[0], "BEGIN EXCLUSIVE").expect(SQLITE_OK);
+    prepare(commit_, "COMMIT").expect(SQLITE_OK);
+  }
 
   Result prepare(Statement &stmt, const std::string &sql) {
     int rc;
@@ -314,10 +330,18 @@ public:
         sqlite3_exec(p_conn_.get(), sql.c_str(), nullptr, nullptr, nullptr));
   }
 
+  Result begin(TransactionBehavior behavior = DEFERRED) {
+    return begin_[behavior].execute();
+  }
+
+  Result commit() { return commit_.execute(); }
+
   const char *errmsg() { return sqlite3_errmsg(p_conn_.get()); }
 
 private:
   std::shared_ptr<sqlite3> p_conn_;
+  std::array<Statement, 3> begin_;
+  Statement commit_;
 };
 
 class Database {
