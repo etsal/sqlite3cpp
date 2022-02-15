@@ -251,67 +251,70 @@ private:
   template <int... i, typename... T>
   Result bind_all(std::integer_sequence<int, i...>, T... args) {
     int rc;
-    [[maybe_unused]] bool b = (((rc = bind(i + 1, args)) == SQLITE_OK) && ...);
+    (((rc = bind(i + 1, args)) == SQLITE_OK) && ...);
     return Result(rc);
   }
 
-  template <> Result bind<Blob>(int i, Blob v) {
-    return bind_blob(i, v.data, v.size, v.destructor);
-  }
-
-  template <> Result bind<Blob64>(int i, Blob64 v) {
-    return bind_blob64(i, v.data, v.size, v.destructor);
-  }
-
-  template <> Result bind<double>(int i, double v) { return bind_double(i, v); }
-
-  template <> Result bind<int>(int i, int v) { return bind_int(i, v); }
-
-  template <> Result bind<sqlite3_int64>(int i, sqlite3_int64 v) {
-    return bind_int64(i, v);
-  }
-
-  template <> Result bind<Null>(int i, Null) { return bind_null(i); }
-
-  template <> Result bind<Text>(int i, Text v) {
-    return bind_text(i, v.data, v.size, v.destructor);
-  }
-
-  template <> Result bind<const char *>(int i, const char *v) {
-    return bind_text(i, v);
-  }
-
-  template <> Result bind<const std::string &>(int i, const std::string &v) {
-    return bind_text(i, v);
-  }
-
-  template <> Result bind<Text16>(int i, Text16 v) {
-    return bind_text16(i, v.data, v.size, v.destructor);
-  }
-
-  template <> Result bind<Text64>(int i, Text64 v) {
-    return bind_text64(i, v.data, v.size, v.destructor, v.encoding);
-  }
-
-  template <> Result bind<sqlite3_value *>(int i, sqlite3_value *v) {
-    return bind_value(i, v);
-  }
-
-  template <> Result bind<Pointer>(int i, Pointer v) {
-    return bind_pointer(i, v.pointer, v.type, v.destructor);
-  }
-
-  template <> Result bind<ZeroBlob>(int i, ZeroBlob v) {
-    return bind_zeroblob(i, v.size);
-  }
-
-  template <> Result bind<ZeroBlob64>(int i, ZeroBlob64 v) {
-    return bind_zeroblob64(i, v.size);
-  }
-
   std::shared_ptr<sqlite3_stmt> p_stmt_;
-  [[maybe_unused]] std::shared_ptr<sqlite3> p_conn_;
+  std::shared_ptr<sqlite3> p_conn_;
 };
+
+template <> Result Statement::bind<Blob>(int i, Blob v) {
+  return bind_blob(i, v.data, v.size, v.destructor);
+}
+
+template <> Result Statement::bind<Blob64>(int i, Blob64 v) {
+  return bind_blob64(i, v.data, v.size, v.destructor);
+}
+
+template <> Result Statement::bind<double>(int i, double v) {
+  return bind_double(i, v);
+}
+
+template <> Result Statement::bind<int>(int i, int v) { return bind_int(i, v); }
+
+template <> Result Statement::bind<sqlite3_int64>(int i, sqlite3_int64 v) {
+  return bind_int64(i, v);
+}
+
+template <> Result Statement::bind<Null>(int i, Null) { return bind_null(i); }
+
+template <> Result Statement::bind<Text>(int i, Text v) {
+  return bind_text(i, v.data, v.size, v.destructor);
+}
+
+template <> Result Statement::bind<const char *>(int i, const char *v) {
+  return bind_text(i, v);
+}
+
+template <>
+Result Statement::bind<const std::string &>(int i, const std::string &v) {
+  return bind_text(i, v);
+}
+
+template <> Result Statement::bind<Text16>(int i, Text16 v) {
+  return bind_text16(i, v.data, v.size, v.destructor);
+}
+
+template <> Result Statement::bind<Text64>(int i, Text64 v) {
+  return bind_text64(i, v.data, v.size, v.destructor, v.encoding);
+}
+
+template <> Result Statement::bind<sqlite3_value *>(int i, sqlite3_value *v) {
+  return bind_value(i, v);
+}
+
+template <> Result Statement::bind<Pointer>(int i, Pointer v) {
+  return bind_pointer(i, v.pointer, v.type, v.destructor);
+}
+
+template <> Result Statement::bind<ZeroBlob>(int i, ZeroBlob v) {
+  return bind_zeroblob(i, v.size);
+}
+
+template <> Result Statement::bind<ZeroBlob64>(int i, ZeroBlob64 v) {
+  return bind_zeroblob64(i, v.size);
+}
 
 class Connection {
 public:
