@@ -232,7 +232,7 @@ public:
 
   Result execute(size_t &count) {
     count = 0;
-    while (step() == SQLITE_DONE) {
+    while (step() == SQLITE_ROW) {
       ++count;
     }
     return reset();
