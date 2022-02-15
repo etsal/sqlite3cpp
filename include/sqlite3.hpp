@@ -343,6 +343,8 @@ public:
 
   Result commit() { return commit_.execute(); }
 
+  int changes() { return sqlite3_changes(p_conn_.get()); }
+
   const char *errmsg() { return sqlite3_errmsg(p_conn_.get()); }
 
 private:
