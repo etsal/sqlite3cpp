@@ -119,6 +119,8 @@ public:
   Statement(sqlite3_stmt *p_stmt, std::shared_ptr<sqlite3> p_conn)
       : p_stmt_(p_stmt, sqlite3_finalize), p_conn_(std::move(p_conn)) {}
 
+  [[nodiscard]] const std::shared_ptr<sqlite3_stmt> &ptr() { return p_stmt_; }
+
   Result bind_blob(int i, const void *data, int size,
                    void (*destructor)(void *) = nullptr) {
     return Result(sqlite3_bind_blob(p_stmt_.get(), i, data, size, destructor));
@@ -321,6 +323,8 @@ public:
     prepare(begin_[0], "BEGIN EXCLUSIVE").expect(SQLITE_OK);
     prepare(commit_, "COMMIT").expect(SQLITE_OK);
   }
+
+  [[nodiscard]] const std::shared_ptr<sqlite3> &ptr() { return p_conn_; }
 
   Result prepare(Statement &stmt, const std::string &sql) {
     int rc;
