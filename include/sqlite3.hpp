@@ -230,10 +230,17 @@ public:
 
   Result reset() { return Result(sqlite3_reset(p_stmt_.get())); }
 
-  Result execute() {
-    while (step() == SQLITE_DONE)
-      ;
+  Result execute(size_t &count) {
+    count = 0;
+    while (step() == SQLITE_DONE) {
+      ++count;
+    }
     return reset();
+  }
+
+  Result execute() {
+    size_t count;
+    return execute(count);
   }
 
   template <typename T> Result bind(int i, T v) = delete;
