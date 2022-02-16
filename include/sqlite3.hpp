@@ -251,7 +251,7 @@ private:
   template <int... i, typename... T>
   Result bind_all(std::integer_sequence<int, i...>, T... args) {
     int rc;
-    (((rc = bind(i + 1, args)) == SQLITE_OK) && ...);
+    (void)(((rc = bind(i + 1, args)) == SQLITE_OK) && ...);
     return Result(rc);
   }
 
