@@ -350,6 +350,14 @@ public:
 
   Result commit() { return commit_.execute(); }
 
+  Result enable_extensions() {
+    return Result(sqlite3_enable_load_extension(p_conn_.get(), 1));
+  }
+
+  Result load_extension(const std::string &extension) {
+    return Result(sqlite3_load_extension(p_conn_.get(), extension.c_str(), NULL, NULL));
+  }
+
   int changes() { return sqlite3_changes(p_conn_.get()); }
 
   const char *errmsg() { return sqlite3_errmsg(p_conn_.get()); }
