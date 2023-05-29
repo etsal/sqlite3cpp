@@ -385,6 +385,19 @@ public:
     return Result(rc);
   }
 
+  Result connect(Connection &conn, std::string &extension) {
+    int rc;
+    rc = sqlite3_initialize();
+    if (rc == SQLITE_OK) {
+      sqlite3 *p_conn;
+      rc = sqlite3_open_v2(filename_.c_str(), &p_conn, 0, extension.c_str());
+      if (rc == SQLITE_OK) {
+        conn = Connection(p_conn);
+      }
+    }
+    return Result(rc);
+  }
+
 private:
   std::string filename_;
 };
