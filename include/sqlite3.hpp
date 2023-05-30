@@ -394,7 +394,10 @@ public:
     rc = sqlite3_initialize();
     if (rc == SQLITE_OK) {
       sqlite3 *p_conn;
-      rc = sqlite3_open_v2(filename_.c_str(), &p_conn, 0, extension.c_str());
+      rc = sqlite3_open_v2(filename_.c_str(),
+			  &p_conn,
+			  SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
+			  extension.c_str());
       if (rc == SQLITE_OK) {
         conn = Connection(p_conn);
       }
