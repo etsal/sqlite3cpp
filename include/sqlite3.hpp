@@ -327,6 +327,10 @@ public:
     prepare(commit_, "COMMIT").expect(SQLITE_OK);
   }
 
+  ~Connection() {
+    sqlite3_close(p_conn_.get());
+  }
+
   [[nodiscard]] const std::shared_ptr<sqlite3> &ptr() { return p_conn_; }
 
   Result prepare(Statement &stmt, const std::string &sql) {
